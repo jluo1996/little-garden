@@ -53,12 +53,12 @@ def launch_copilot(path):
     try:
         command = "copilot" if os.name == "nt" else ["copilot"]
         subprocess.run(command, cwd=path, check=True, shell=os.name == "nt")
-    except FileNotFoundError:
+    except FileNotFoundError as exc:
         print("Error: 'copilot' command was not found in PATH.")
-        raise SystemExit(1)
+        raise SystemExit(1) from exc
     except subprocess.CalledProcessError as exc:
         print(f"Error: Copilot CLI exited with status {exc.returncode}.")
-        raise SystemExit(exc.returncode)
+        raise SystemExit(exc.returncode) from exc
 
 
 def parse_args():
