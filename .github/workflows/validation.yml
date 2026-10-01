@@ -1,0 +1,16 @@
+name: Validation Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+
+jobs:
+  code_quality_check:
+    uses: ./.github/workflows/templates/code_quality_check_yml
