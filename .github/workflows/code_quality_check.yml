@@ -35,4 +35,3 @@ jobs:
       - name: Pylint
         working-directory: "${{ env.PYLINT_TARGET_PATH }}"
         run: python -m pylint --recursive=y .
-
