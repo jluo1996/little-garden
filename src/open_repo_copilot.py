@@ -51,7 +51,8 @@ def launch_copilot(path):
     """Launch Copilot CLI inline in the given folder."""
     print(f"Launching Copilot CLI in {path}...")
     try:
-        subprocess.run(["copilot"], cwd=path, check=True)
+        command = "copilot" if os.name == "nt" else ["copilot"]
+        subprocess.run(command, cwd=path, check=True, shell=os.name == "nt")
     except FileNotFoundError:
         print("Error: 'copilot' command was not found in PATH.")
         raise SystemExit(1)
