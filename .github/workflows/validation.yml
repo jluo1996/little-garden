@@ -13,4 +13,4 @@ on:
 
 jobs:
   code_quality_check:
-    uses: ./.github/workflows/templates/code_quality_check_yml
+    uses: .github/workflows/templates/code_quality_check_yml
