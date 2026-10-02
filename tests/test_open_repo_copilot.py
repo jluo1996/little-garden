@@ -1,3 +1,5 @@
+"""Tests for the open_repo_copilot module."""
+
 import importlib.util
 import subprocess
 from pathlib import Path
@@ -13,6 +15,7 @@ spec.loader.exec_module(open_repo_copilot)
 
 
 def test_list_repos_only_returns_git_directories(tmp_path):
+    """Only repositories containing a .git directory should be reported."""
     repo_a = tmp_path / "RepoA"
     repo_b = tmp_path / "RepoB"
     repo_c = tmp_path / "RepoC"
@@ -29,6 +32,7 @@ def test_list_repos_only_returns_git_directories(tmp_path):
 
 
 def test_get_active_branch_returns_branch_or_none(monkeypatch):
+    """The active branch is returned when git succeeds, otherwise None."""
     success = SimpleNamespace(returncode=0, stdout="feature/login\n")
     failure = SimpleNamespace(returncode=128, stdout="fatal: not a git repo\n")
 
@@ -46,6 +50,7 @@ def test_get_active_branch_returns_branch_or_none(monkeypatch):
 
 
 def test_find_repo_handles_case_insensitive_exact_match():
+    """Repository lookup should be case-insensitive and trim whitespace."""
     repos = ["Alpha", "beta", "Gamma"]
 
     assert open_repo_copilot.find_repo("alpha", repos) == "Alpha"
@@ -54,6 +59,7 @@ def test_find_repo_handles_case_insensitive_exact_match():
 
 
 def test_launch_copilot_runs_command_and_raises_on_error(monkeypatch, capsys):
+    """The Copilot launcher runs the CLI and exits with the correct status."""
     calls = []
 
     def fake_run(command, cwd, check, shell):
@@ -90,12 +96,14 @@ def test_launch_copilot_runs_command_and_raises_on_error(monkeypatch, capsys):
 
 
 def test_parse_args_reads_root_argument(monkeypatch):
+    """The root path should be read from argv."""
     monkeypatch.setattr("sys.argv", ["open_repo_copilot.py", "/tmp/workspace"])
     args = open_repo_copilot.parse_args()
     assert args.root == "/tmp/workspace"
 
 
 def test_main_selects_repo_by_name_and_launches(monkeypatch, tmp_path, capsys):
+    """The main entry point chooses a repo from the menu and launches it."""
     root = tmp_path / "repos"
     root.mkdir()
     repo_dir = root / "AlphaRepo"
@@ -103,10 +111,18 @@ def test_main_selects_repo_by_name_and_launches(monkeypatch, tmp_path, capsys):
     (repo_dir / ".git").mkdir()
 
     monkeypatch.setattr(open_repo_copilot.sys, "argv", ["open_repo_copilot.py", str(root)])
-    monkeypatch.setattr("builtins.input", lambda prompt: "alpharepo")
+
+    def fake_input(_prompt):
+        return "alpharepo"
+
+    monkeypatch.setattr("builtins.input", fake_input)
 
     launched = []
-    monkeypatch.setattr(open_repo_copilot, "launch_copilot", lambda path: launched.append(path))
+
+    def fake_launch(path):
+        launched.append(path)
+
+    monkeypatch.setattr(open_repo_copilot, "launch_copilot", fake_launch)
 
     open_repo_copilot.main()
 
@@ -115,6 +131,7 @@ def test_main_selects_repo_by_name_and_launches(monkeypatch, tmp_path, capsys):
 
 
 def test_main_exits_on_blank_or_q_input(monkeypatch, tmp_path, capsys):
+    """The main entry point exits cleanly on blank or quit input."""
     root = tmp_path / "repos"
     root.mkdir()
     repo_dir = root / "AlphaRepo"
@@ -122,12 +139,20 @@ def test_main_exits_on_blank_or_q_input(monkeypatch, tmp_path, capsys):
     (repo_dir / ".git").mkdir()
 
     monkeypatch.setattr(open_repo_copilot.sys, "argv", ["open_repo_copilot.py", str(root)])
-    monkeypatch.setattr("builtins.input", lambda prompt: "q")
+
+    def fake_input(_prompt):
+        return "q"
+
+    monkeypatch.setattr("builtins.input", fake_input)
 
     launched = []
-    monkeypatch.setattr(open_repo_copilot, "launch_copilot", lambda path: launched.append(path))
+
+    def fake_launch(path):
+        launched.append(path)
+
+    monkeypatch.setattr(open_repo_copilot, "launch_copilot", fake_launch)
 
     open_repo_copilot.main()
 
-    assert launched == []
+    assert not launched
     assert "Exiting." in capsys.readouterr().out
