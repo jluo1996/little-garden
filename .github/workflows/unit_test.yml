@@ -29,9 +29,9 @@ jobs:
         working-directory: "${{ env.PYTHON_REQUIREMENTS_PATH }}"
         run: python -m pip install -r "${{ env.PYTHON_REQUIREMENTS_FILE }}"
 
-      - name: Install Pylint
-        run: python -m pip install pylint
+      - name: Install Pytest
+        run: python -m pip install pytest
 
-      - name: Pylint
+      - name: Pytest
         working-directory: "${{ env.PYLINT_TARGET_PATH }}"
-        run: python -m pylint --recursive=y .
+        run: python -m pytest .

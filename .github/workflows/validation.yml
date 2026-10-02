@@ -12,3 +12,6 @@ on:
 jobs:
   code_quality_check:
     uses: ./.github/workflows/code_quality_check.yml
+
+  unit_test:
+    uses: ./.github/workflows/unit_test.yml
